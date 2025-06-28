@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load cart_tag %}
+
+{% block body %}
+<section class="cart-area pt-120 pb-120">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="table-content table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th class="product-thumbnail">Image</th>
+                                <th class="cart-product-name">Product</th>
+                                <th class="product-price">Unit Price</th>
+                                <th class="product-quantity">Quantity</th>
+                                <th class="product-subtotal">SubTotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for key, value in request.session.cart.items %}
+                            <tr id="id{{ value.id }}">
+                                <td class="product-thumbnail">
+                                    <a href="#"><img src="{{ value.featured_image }}" alt="Product Image" style="width: 80px;"></a>
+                                </td>
+                                <td class="product-name">
+                                    <a href="#">{{ value.product_name|truncatewords:10 }}</a>
+                                </td>
+                                <td class="product-price">₹ {{ value.price }}</td>
+                                <td class="product-quantity" style="text-align: center;">
+                                    <input type="text" value="{{ value.quantity }}" class="form-control text-center" readonly>
+                                </td>
+                                <td class="product-subtotal">
+                                    ₹ {{ value.price|multiply:value.quantity }}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Total and Pay Button Section -->
+                <div class="row justify-content-end mt-4">
+                    <div class="col-md-6">
+                        <div class="cart-total-box" style="border: 1px solid #ddd; padding: 20px; border-radius: 8px;">
+                            <h4>Order Summary</h4>
+                            <ul style="list-style: none; padding: 0;">
+                                <li><strong>Subtotal:</strong> ₹ {{ cart_total_amount }}</li>
+                                
+                            </ul>
+
+                            <div class="text-end mt-3">
+                                <button id="rzp-button1" class="tp-btn-h1 w-100">Proceed to Pay</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Razorpay Script -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+    var options = {
+        "key": "rzp_test_IAHqBNAxLKGiAR",
+        "amount": "{{ cart_total_amount|floatformat:0|stringformat:'d' }}00", // Razorpay needs amount in paisa
+        "currency": "INR",
+        "name": "Kartsy",
+        "description": "Order Payment",
+        "image": "https://example.com/your_logo",
+        "order_id": "{{ order_id }}",
+        "callback_url": "{% url 'success' %}",
+        "prefill": {
+            "name": "{{ user.first_name }} {{ user.last_name }}",
+            "email": "{{ user.email }}",
+            "contact": "{{ user.profile.phone|default:'' }}"
+        },
+        "notes": {
+            "address": "{{ user.profile.address|default:'No address' }}"
+        },
+        "theme": {
+            "color": "#3399cc"
+        }
+    };
+
+    var rzp1 = new Razorpay(options);
+    document.getElementById('rzp-button1').onclick = function(e) {
+        rzp1.open();
+        e.preventDefault();
+    }
+</script>
+
+{% endblock %}

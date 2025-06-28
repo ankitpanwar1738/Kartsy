@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block body %}
+<style>
+    .step {
+        text-align: center;
+        position: relative;
+        width: 100%;
+    }
+
+    .step .circle {
+        height: 30px;
+        width: 30px;
+        border-radius: 50%;
+        background-color: #ccc;
+        display: inline-block;
+        line-height: 30px;
+        color: white;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .step.active .circle {
+        background-color: #28a745;
+    }
+
+    .step .label {
+        font-size: 14px;
+        color: #333;
+    }
+
+    .progress-container {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 40px;
+        position: relative;
+    }
+
+    .progress-container::before {
+        content: '';
+        position: absolute;
+        top: 15px;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background-color: #ccc;
+        z-index: 0;
+    }
+
+    .progress-container .step {
+        z-index: 1;
+    }
+
+    .back-btn {
+        margin-top: 30px;
+    }
+</style>
+
+<div class="container my-5">
+    <h2 class="text-center mb-4">Tracking Order: {{ order.order_id }}</h2>
+
+    <div class="progress-container">
+        {% with status_list="Placed,Processing,Shipped,Out for Delivery,Delivered" %}
+        {% for s in status_list.split(',') %}
+        <div class="step {% if s == order.status or status_list.split(',').index(s) < status_list.split(',').index(order.status) %}active{% endif %}">
+            <div class="circle">{{ forloop.counter }}</div>
+            <div class="label">{{ s }}</div>
+        </div>
+        {% endfor %}
+        {% endwith %}
+    </div>
+
+    <div class="text-center back-btn">
+        <a href="{% url 'my_orders' %}" class="btn btn-outline-primary">← Back to My Orders</a>
+    </div>
+</div>
+{% endblock %}

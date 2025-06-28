@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block body %}
+<section class="wishlist-area pt-100 pb-100">
+    <div class="container">
+        <h2>Your Wishlist</h2>
+        <div class="row">
+            {% if wishlist_items %}
+                {% for item in wishlist_items %}
+                <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                    <div class="product__item">
+                        <div class="product__thumb">
+                            <a href="{% url 'product_detail' slug=item.product.slug %}">
+                                <img src="{{ item.product.featured_image.url }}" alt="{{ item.product.product_name }}" height="200">
+                            </a>
+                        </div>
+                        <div class="product__content">
+                            <h6><a href="{% url 'product_detail' slug=item.product.slug %}">{{ item.product.product_name|truncatewords:5 }}</a></h6>
+                            <div class="price">₹ {{ item.product.price }}</div>
+                            <a href="{% url 'remove_from_wishlist' item.product.id %}" class="btn btn-danger btn-sm mt-2">Remove</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-12 text-center">
+                    <img src="{% static 'product.png' %}" height="300">
+                    <h4>Your wishlist is empty</h4>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

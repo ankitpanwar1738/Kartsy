@@ -1,0 +1,292 @@
+<!-- header-start -->
+{% load static %}
+{% load custom_tags %}
+
+<header class="header d-blue-bg">
+  <!-- Top Row -->
+  <div class="header-top">
+    <div class="container">
+      <div class="header-inner">
+        <div class="row align-items-center">
+          <div class="col-xl-6 col-lg-7">
+            <div class="header-inner-start">
+              <div class="support">
+                {% if user.is_authenticated %}
+                  <p>
+                    Welcome
+                    {% if user.first_name == '' %}
+                      {{ user.email }}
+                    {% else %}
+                      {{ user.first_name }} {{ user.last_name }}
+                    {% endif %}
+                  </p>
+                {% else %}
+                  <p>Please do login first...</p>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Middle Row -->
+  <div class="header-mid">
+    <div class="container">
+      <div class="heade-mid-inner">
+        <div class="row align-items-center">
+
+          <!-- Logo + Hamburger -->
+          <div class="col-xl-3 col-lg-3 col-md-4 col-sm-4">
+            <div class="header__info d-flex align-items-center justify-content-between">
+              <div class="logo">
+                <a href="{% url 'home' %}" class="logo-image">
+                  <h1 style="color: white; margin: 0;">Kartsy</h1>
+                </a>
+              </div>
+              <div class="side-menu d-lg-none">
+                <button type="button" class="side-menu-btn offcanvas-toggle-btn"
+                        style="background: none; border: none; font-size: 26px; color: white;">
+                  <i class="fas fa-bars"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mobile Sidebar -->
+          <div id="mobileMenu" style="position: fixed; top: 0; left: -280px; width: 260px; height: 100%; background-color: #1e1e2f; color: white; z-index: 9999; transition: left 0.3s ease; box-shadow: 2px 0 5px rgba(0,0,0,0.2); overflow-y: auto;">
+            <div style="padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;">
+              <a href="{% url 'home' %}" class="logo">
+                <h2 style="color: white; margin: 0;">Kartsy</h2>
+              </a>
+              <button class="close-btn" style="background: none; border: none; font-size: 28px; color: white; cursor: pointer;">&times;</button>
+            </div>
+            <nav style="padding: 0 20px;">
+              <ul style="list-style: none; padding-left: 0; font-size: 16px;">
+                <li style="margin-bottom: 15px;"><a href="{% url 'home' %}" style="color: white;">Home</a></li>
+                <li style="margin-bottom: 15px;"><a href="{% url 'about' %}" style="color: white;">About Us</a></li>
+                <li style="margin-bottom: 15px;"><a href="{% url 'contact' %}" style="color: white;">Contact Us</a></li>
+                <li style="margin-bottom: 15px;"><a href="{% url 'product' %}" style="color: white;">Product</a></li>
+                <li style="margin-bottom: 10px;"><span style="color: white;">My Orders</span>
+                  <ul style="list-style: none; padding-left: 15px; margin-top: 5px;">
+                    <li style="margin-bottom: 10px;"><a href="{% url 'myorders' %}" style="color: #ccc;">Orders</a></li>
+                    {% if order.order_id %}
+                      <li><a href="{% url 'track_order' order.order_id %}" class="btn btn-sm btn-outline-success">Track Order</a></li>
+                    {% else %}
+                      <span class="text-muted">Tracking not available</span>
+                    {% endif %}
+                  </ul>
+                </li>
+              </ul>
+            </nav>
+          </div>
+
+          <!-- Search Bar -->
+          <div class="header__search col-md-4 col-sm-8">
+            <form action="{% url 'search_results' %}" method="get"
+                  style="width: 100%; display: flex; align-items: center; border: 2px solid #ccc; border-radius: 50px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+              <input class="search-input" type="text" name="q" placeholder="I'm shopping for..."
+                     style="flex-grow:1; padding:12px 20px; border:none; font-size:16px; outline:none; border-radius:50px 0 0 50px;">
+              <button class="button" type="submit"
+                      style="padding:12px 20px; background-color:#007bff; color:white; border:none; border-radius:0 50px 50px 0;">
+                <i class="far fa-search"></i>
+              </button>
+            </form>
+          </div>
+
+          <!-- User, Wishlist, Cart -->
+          <div class="col-xl-4 col-lg-5 col-md-8 col-sm-8">
+            <div class="header-action d-flex">
+              {% if user.is_authenticated %}
+                <div class="block-userlink">
+                  <a class="icon-link" href="{% url 'profile' %}">
+                    <i class="flaticon-user"></i>
+                    <span class="text"><span class="sub">My Account</span> Profile</span>
+                  </a>
+                </div>
+              {% else %}
+                <div class="block-userlink">
+                  <a class="icon-link" href="{% url 'login' %}">
+                    <i class="flaticon-user"></i>
+                    <span class="text"><span class="sub">Login</span> My Account</span>
+                  </a>
+                </div>
+              {% endif %}
+
+              <div class="block-wishlist action">
+                <a class="icon-link" href="{% url 'wishlist' %}">
+                  <i class="flaticon-heart"></i>
+                  <span class="count">{{ wishlist_count }}</span>
+                  <span class="text"><span class="sub">Favorite</span> My Wishlist</span>
+                </a>
+              </div>
+
+              <div class="block-cart action">
+                <a class="icon-link" href="{% url 'cart_detail' %}">
+                  <i class="flaticon-shopping-bag"></i>
+                  <span class="count">{{ request.session.cart|length }}</span>
+                  <span class="text"><span class="sub">Your Cart:</span> ₹ {{ cart_total_amount }}</span>
+                </a>
+
+                <!-- Cart Dropdown -->
+                <div class="cart">
+                  <div class="cart__mini">
+                    <ul>
+                      <li>
+                        <div class="cart__title">
+                          <h4>Your Cart</h4>
+                          <span>({{ request.session.cart|length }} Item{{ request.session.cart|length|pluralize }} in Cart)</span>
+                        </div>
+                      </li>
+                      {% for key, value in request.session.cart.items %}
+                      <li>
+                        <div class="cart__item d-flex justify-content-between align-items-center">
+                          <div class="cart__inner d-flex">
+                            <div class="cart__thumb">
+                              <a href="">
+                                <img src="{{ value.featured_image }}" alt="{{ value.product_name }}" style="width:50px;">
+                              </a>
+                            </div>
+                            <div class="cart__details">
+                              <h6><a href="">{{ value.product_name }}</a></h6>
+                              <div class="cart__price">
+                                <span>₹ {{ value.price }}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="cart__del">
+                            <a href="{% url 'item_clear' key %}"><i class="fal fa-times"></i></a>
+                          </div>
+                        </div>
+                      </li>
+                      {% endfor %}
+                      <li>
+                        <div class="cart__sub d-flex justify-content-between align-items-center">
+                          <h6>Subtotal</h6>
+                          <span class="cart__sub-total">₹ {{ cart_total_amount }}</span>
+                        </div>
+                      </li>
+                      <li>
+                        <a href="{% url 'cart_detail' %}" class="wc-cart mb-10">View cart</a>
+                        <a href="{% url 'checkout' %}" class="wc-checkout">Checkout</a>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+                <!-- End Dropdown -->
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Menu -->
+  <div class="header__bottom">
+    <div class="container">
+      <div class="row g-0 align-items-center">
+        <div class="col-lg-3">
+  <div class="cat__menu-wrapper side-border d-block">
+    <div class="cat-toggle">
+      <button type="button" class="cat-toggle-btn cat-toggle-btn-1">
+        <i class="fal fa-bars"></i> Shop by department
+      </button>
+      <div class="cat__menu">
+        <nav>
+          <ul>
+            {% for i in main_cate %}
+              <li>
+                <a href="javascript:void(0);">{{ i.name }} <i class="far fa-angle-down"></i></a>  {# No broken link here #}
+                <ul class="mega-menu">
+                  {% for j in i.category_set.all %}
+                    <li>
+                      <a href="{% url 'department' category_id=j.id %}" style="color:orange; ">{{ j.name }}</a>
+                      <ul class="mega-item">
+                        {% for k in j.sub_category_set.all %}
+                          <li><a href="{% url 'subcategory' sub_id=k.id %}">{{ k.name }}</a></li>
+                        {% endfor %}
+                      </ul>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </li>
+            {% endfor %}
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </div>
+</div>
+
+        <div class="col-lg-6 col-md-6 col-3">
+          <div class="main-menu d-none d-lg-block">
+            <nav>
+              <ul>
+                <li><a href="{% url 'home' %}" class="active">Home</a></li>
+                <li><a href="{% url 'about' %}">About Us</a></li>
+                <li><a href="{% url 'contact' %}">Contact Us</a></li>
+                <li><a href="{% url 'product' %}">Product</a></li>
+                <li><a href="#">My Orders <i class="far fa-angle-down"></i></a>
+                  <ul class="submenu">
+                    {% if user.is_authenticated %}
+                      <li><a href="{% url 'myorders' %}">Orders</a></li>
+                    {% endif %}
+                    {% if order.order_id %}
+                      <li><a href="{% url 'track_order' order.order_id %}" class="btn btn-sm btn-outline-success">Track Order</a></li>
+                    {% else %}
+                      <span class="text-muted">Tracking not available</span>
+                    {% endif %}
+                  </ul>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const btn = document.querySelector('.offcanvas-toggle-btn');
+  const menu = document.getElementById('mobileMenu');
+  const closeBtn = document.querySelector('#mobileMenu .close-btn');
+  btn.addEventListener('click', () => menu.style.left = '0');
+  closeBtn.addEventListener('click', () => menu.style.left = '-280px');
+});
+</script>
+
+<style>
+@media (max-width: 767.98px) {
+  .header-mid { padding: 10px 0; }
+  .header__info {
+    flex-direction: row !important;
+    justify-content: space-between !important;
+  }
+  .header__search { margin: 10px 0; }
+  .header-action {
+    display: flex !important;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    gap: 5px;
+  }
+  .block-userlink,
+  .block-wishlist,
+  .block-cart {
+    flex: 1 1 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .header__bottom, .cat__menu-wrapper {
+    display: block !important;
+  }
+  .main-menu { display: none !important; }
+  .cart__mini { display: none !important; }
+}
+</style>
+<!-- header-end -->

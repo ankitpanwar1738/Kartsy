@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+{% block body %}
+
+<style>
+    .order-container {
+        margin: 40px auto;
+        max-width: 900px;
+    }
+
+    .order-card {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        padding: 25px 30px;
+        margin-bottom: 25px;
+        animation: fadeInUp 0.6s ease;
+    }
+
+    .order-header {
+        display: flex;
+        justify-content: space-between;
+        font-size: 14px;
+        color: #555;
+        margin-bottom: 10px;
+    }
+
+    .order-title {
+        font-size: 28px;
+        font-weight: 700;
+        color: #222;
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .order-content {
+        display: flex;
+        gap: 20px;
+        align-items: center;
+    }
+
+    .order-image {
+        flex: 0 0 100px;
+    }
+
+    .order-image img {
+        width: 100px;
+        height: auto;
+        border-radius: 8px;
+    }
+
+    .order-details {
+        flex-grow: 1;
+    }
+
+    .order-details h5 {
+        font-size: 16px;
+        color: #007185;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    .order-details p {
+        margin: 0;
+        font-size: 14px;
+        color: #333;
+    }
+
+    .order-actions {
+        margin-top: 15px;
+    }
+
+    .order-actions .btn {
+        font-size: 13px;
+        padding: 6px 14px;
+        margin-right: 8px;
+    }
+
+    .badge-paid {
+        background-color: #28a745;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 6px;
+        font-size: 13px;
+    }
+
+    .badge-pending {
+        background-color: #ffc107;
+        color: #222;
+        padding: 5px 10px;
+        border-radius: 6px;
+        font-size: 13px;
+    }
+
+    .badge-cancelled {
+        background-color: #dc3545;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 6px;
+        font-size: 13px;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<div class="container order-container">
+    <div class="order-title">🛍 My Orders</div>
+
+    {% if orders %}
+        {% for order in orders %}
+        <div class="order-card">
+            <div class="order-header">
+                <div>Order ID: <strong>#{{ order.order_id }}</strong></div>
+                <div>Placed on: {{ order.date|date:"d M Y" }}</div>
+            </div>
+
+            <div class="order-content">
+                <div class="order-image">
+                    <img src="{{ order.image.url }}" alt="Product Image">
+                </div>
+                <div class="order-details">
+                    <h5>{{ order.product_name }}</h5>
+                    <p>Amount: ₹{{ order.amount }}</p>
+                    <p>Status:
+                        {% if order.cancelled %}
+                            <span class="badge-cancelled">Cancelled</span>
+                        {% elif order.paid %}
+                            <span class="badge-paid">Paid</span>
+                        {% else %}
+                            <span class="badge-pending">Pending</span>
+                        {% endif %}
+                    </p>
+
+                    <div class="order-actions">
+                        {% if not order.cancelled and not order.delivered %}
+                            <form method="post" action="{% url 'cancel_order' order.id %}" onsubmit="return confirm('Are you sure you want to cancel this order?');" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-danger btn-sm">Cancel Order</button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="text-center">
+            <p class="lead">No orders found yet. Start shopping now!</p>
+            <a href="{% url 'product' %}" class="btn btn-primary">Shop Now</a>
+        </div>
+    {% endif %}
+</div>
+
+{% endblock %}

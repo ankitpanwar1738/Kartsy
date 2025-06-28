@@ -1,0 +1,427 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block body %} 
+
+
+        <!-- breadcrumb__area-start -->
+        <section class="breadcrumb__area box-plr-75">
+            <div class="container">
+                <div class="row">
+                    <div class="col-xxl-12">
+                        <div class="breadcrumb__wrapper">
+                            <nav aria-label="breadcrumb">
+                                <ol class="breadcrumb">
+                                  <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+                                  <li class="breadcrumb-item active" aria-current="page">Shop</li>
+                                </ol>
+                              </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- breadcrumb__area-end -->
+
+        <!-- shop-area-start -->
+        <div class="shop-area mb-20">
+            <div class="container">
+                <div class="row">
+                    <div class="col-xl-3 col-lg-4">
+                        <div class="product-widget mb-30">
+                            <h5 class="pt-title">Product categories</h5>
+                            <div class="widget-category-list mt-20">
+
+                    <form id="categoryFilterForm" method="get" action="{% url 'product' %}">
+                        <h3>Categories</h3>
+                        {% for cat in category %}
+                            <label>
+                                <input type="checkbox" name="category" value="{{ cat.id }}"
+                                    {% if cat.id in selected_category %}checked{% endif %}
+                                    onchange="document.getElementById('categoryFilterForm').submit()"
+                                >
+                                {{ cat.name }} ({{ cat.product_count }})
+                            </label><br>
+                        {% endfor %}
+
+
+                    </form>
+                            </div>
+                        </div>
+
+
+
+                        <div class="product-widget mb-30">
+
+                            <form method="get" action="{% url 'product' %}">
+                                <label for="max_price">
+                                    Max Price: ₹<span id="price-label">{{ request.GET.max_price|default:max_price }}</span>
+                                </label><br>
+
+                                <input
+                                    type="range"
+                                    id="max_price"
+                                    name="max_price"
+                                    min="{{ min_price }}"
+                                    max="{{ max_price }}"
+                                    value="{{ request.GET.max_price|default:max_price }}"
+                                    step="1"
+                                    oninput="document.getElementById('price-label').innerText = this.value"
+                                >
+
+                                <input type="hidden" name="min_price" value="{{ min_price }}">
+
+                                {% if selected_category %}
+                                    {% for cat_id in selected_category %}
+                                        <input type="hidden" name="category" value="{{ cat_id }}">
+                                    {% endfor %}
+                                {% endif %}
+
+                                <button type="submit">Apply Filter</button>
+                            </form>
+
+                        </div>
+
+
+
+                        <div class="product-widget mb-30">
+                            <h5 class="pt-title">Choose Color</h5>
+                            <div class="product__color mt-20">
+                            <ul>
+                                    {% for i in color %}
+                                        <li>
+                                            <a href="?colorID={{ i.id }}
+                                                {% for cat_id in selected_category %}
+                                                    &category={{ cat_id }}
+                                                {% endfor %}
+                                                {% for brand_id in selected_brand %}
+                                                    &brand={{ brand_id }}
+                                                {% endfor %}
+                                                {% if min_price %}
+                                                    &min_price={{ min_price }}
+                                                {% endif %}
+                                                {% if max_price %}
+                                                    &max_price={{ max_price }}
+                                                {% endif %}
+                                            "
+                                            class="black"
+                                            style="background-color:{{ i.code }};">
+                                            </a>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+
+                       
+                       
+                        <div class="product-widget mb-30">
+                            <h5 class="pt-title">Choose Brand</h5>
+                            <div class="widget-category-list mt-20">
+                            <form id="filterForm" method="get" action="{% url 'product' %}">
+                                <div class="widget-category-list mt-20">
+                                    {% for i in brand %}
+                                        <div class="single-widget-category">
+                                            <input
+                                                type="checkbox"
+                                                id="brand-{{ i.id }}"
+                                                name="brand"
+                                                value="{{ i.id }}"
+                                                {% if i.id in selected_brand %}checked{% endif %}
+                                                onchange="document.getElementById('filterForm').submit()"
+                                            >
+                                            <label for="brand-{{ i.id }}">{{ i.name }}</label>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+
+                                <!-- Preserve other filters (optional) -->
+                                {% if selected_category %}
+                                    {% for cat_id in selected_category %}
+                                        <input type="hidden" name="category" value="{{ cat_id }}">
+                                    {% endfor %}
+                                {% endif %}
+                                {% if min_price %}
+                                    <input type="hidden" name="min_price" value="{{ min_price }}">
+                                {% endif %}
+                                {% if max_price %}
+                                    <input type="hidden" name="max_price" value="{{ max_price }}">
+                                {% endif %}
+                                {% if selected_color %}
+                                    <input type="hidden" name="colorID" value="{{ selected_color }}">
+                                {% endif %}
+
+                            </form>
+                            </div>
+                        </div>
+
+                    </div>
+                        
+                        
+                    <div class="col-xl-9 col-lg-8">
+                        
+                        <div class="product-lists-top">
+                            <div class="product__filter-wrap">
+                                <div class="row align-items-center">
+                                    <div class="col-xxl-6 col-xl-6 col-lg-6 col-md-6">
+                                        <div class="product__filter d-sm-flex align-items-center">
+                                            
+                                            <div class="product__result pl-60">
+                                                <p>Showing 1-20 of 29 relults</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-xxl-6 col-xl-6 col-lg-6 col-md-6">
+                                        <div class="product__filter-right d-flex align-items-center justify-content-md-end">
+                                            <div class="product__sorting product__show-no">
+                                                <select>
+                                                    <option>10</option>
+                                                    <option>20</option>
+                                                    <option>30</option>
+                                                    <option>40</option>
+                                                </select>
+                                            </div>
+                                            <div class="product__sorting product__show-position ml-20">
+                                                <select>
+                                                    <option>Latest</option>
+                                                    <option>New</option>
+                                                    <option>Up comeing</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                        </div>
+                        </div>
+                        <div class="tab-content" id="productGridTabContent">
+                            <div class="tab-pane fade  show active" id="FourCol" role="tabpanel" aria-labelledby="FourCol-tab">
+                                <div class="tp-wrapper">
+                                    <div class="row g-0">
+                                {% if product|length == 0 %}
+                                <div style="text-align: center;">
+                                <img src="{% static '/product.png' %}" style="height: 500px; width: 400px; ">
+                                <h1 >Product Not Found</h1>
+                                </div>
+                                {% else %}
+                                {% for i in product %}
+                                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
+                                        <div class="product__item product__item-d">
+                                            <div class="product__thumb fix">
+                                                <div class="product-image w-img">
+                                                    <a href="{% url 'product_detail' slug=i.slug %}">
+                                                        <img src="{{ i.featured_image.url }}" alt="{{ i.product_name }}" height="200px">
+                                                    </a>
+                                                </div>
+                                                <div class="product-action">
+                                                    <a href="#" class="icon-box icon-box-1" data-bs-toggle="modal" data-bs-target="#productModalId-{{ i.id }}">
+                                                        <i class="fal fa-eye"></i>
+                                                        <i class="fal fa-eye"></i>
+                                                    </a>
+                                                   {% if i.id %}
+                                                    <a href="{% url 'add_to_wishlist' i.id %}" class="icon-box icon-box-1" title="Add to Wishlist">
+                                                        <i class="fal fa-heart"></i>
+                                                        <i class="fal fa-heart"></i>
+                                                    </a>
+                                                {% endif %}
+
+                                                    
+                                                </div>
+                                            </div>
+                                            <div class="product__content-3">
+                                                <h6>
+                                                    <a href="{% url 'product_detail' slug=i.slug %}">
+                                                        {{ i.product_name|truncatewords:5 }}
+                                                    </a>
+                                                </h6>
+                                                <div class="rating mb-5">
+                                                    <ul>
+                                                        {% for _ in "12345" %}
+                                                            <li><a href="#"><i class="fal fa-star"></i></a></li>
+                                                        {% endfor %}
+                                                    </ul>
+                                                    <span>(01 review)</span>
+                                                </div>
+                                                <div class="price mb-10">
+                                                    <span>₹ {{ i.price }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="product__add-cart-s text-center">
+                                               <a href="{% url 'cart_add' i.id %}" class="cart-btn product-modal-sidebar-open-btn d-flex align-items-center justify-content-center w-100">
+                                        Add to Cart
+                                        </a>
+                                                
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% empty %}
+                                    <div class="col-12 text-center">
+                                        <p>No products found in this category.</p>
+                                    </div>
+                                {% endfor %}
+
+                                {% endif %}
+
+                                    </div>
+                                </div>
+                            </div>
+                           
+                        <div class="tp-pagination text-center">
+                            <div class="row">
+                                <div class="col-xl-12">
+                                    <div class="basic-pagination pt-30 pb-30">
+                                       <nav aria-label="Page navigation example">
+                    <ul class="pagination justify-content-center">
+
+                        {% if product.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page={{ product.previous_page_number }}" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        {% for num in product.paginator.page_range %}
+                            {% if product.number == num %}
+                                <li class="page-item active"><a class="page-link" href="#">{{ num }}</a></li>
+                            {% else %}
+                                <li class="page-item"><a class="page-link" href="?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page={{ num }}">{{ num }}</a></li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if product.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page={{ product.next_page_number }}" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        {% endif %}
+
+                    </ul>
+                </nav>
+                                     </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- shop-area-end -->
+
+ <!-- shop modal start -->
+{% for i in product %}  {# This must match with product loop used above #}
+<div class="modal fade" id="productModalId-{{ i.id }}" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered product__modal" role="document">
+        <div class="modal-content">
+            <div class="product__modal-wrapper p-relative">
+                <div class="product__modal-close p-absolute">
+                    <button data-bs-dismiss="modal"><i class="fal fa-times"></i></button>
+                </div>
+                <div class="product__modal-inner">
+                    <div class="row">
+                        <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">
+                            <div class="product__modal-box">
+                                <div class="tab-content" id="modalTabContent">
+                                    <div class="tab-pane fade show active" id="nav1-{{ i.id }}" role="tabpanel">
+                                        <div class="product__modal-img w-img">
+                                            <img src="{{ i.product_image_set.first.Image_url }}" alt="">
+                                        </div>
+                                    </div>
+                                    {% for image in i.product_image_set.all %}
+                                    <div class="tab-pane fade" id="nav{{ image.id }}" role="tabpanel">
+                                        <div class="product__modal-img w-img">
+                                            <img src="{{ image.Image_url }}" alt="not found">
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                <ul class="nav nav-tabs" role="tablist">
+                                    {% for image in i.product_image_set.all %}
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link" id="nav{{ image.id }}-tab" data-bs-toggle="tab" data-bs-target="#nav{{ image.id }}" type="button" role="tab">
+                                            <img src="{{ image.Image_url }}" alt="" style="height: 85px; width: 85px;">
+                                        </button>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">
+                            <div class="product__modal-content">
+                                <h4><a href="{{ i.get_absolute_url }}">{{ i.product_name }}</a></h4>
+                                <div class="product__review d-sm-flex">
+                                    <div class="rating rating__shop mb-10 mr-30">
+                                        <ul>
+                                            {% for _ in "12345" %}
+                                            <li><a href="#"><i class="fal fa-star"></i></a></li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                    <div class="product__add-review mb-15">
+                                        <span>01 review</span>
+                                    </div>
+                                </div>
+                                <div class="product__price">
+                                    <span>₹ {{ i.price }}</span>&nbsp;
+                                </div>
+                                <div class="product__modal-des mt-20 mb-15">
+                                    <ul>
+                                        <li><a href="#"><i class="fas fa-circle"></i> {{ i.Product_Information|safe|truncatechars:600 }}</a></li>
+                                    </ul>
+                                </div>
+                                <div class="product__stock mb-20">
+                                    <span class="mr-10">Availability :</span>
+                                    <span>{{ i.Availability }} in stock</span>
+                                </div>
+                                <div class="product__modal-form">
+                                    <form action="#">
+                                        <div class="pro-quan-area d-lg-flex align-items-center">
+                                            <div class="product-quantity mr-20 mb-25">
+                                                <div class="cart-plus-minus p-relative">
+                                                    <input type="text" value="1" />
+                                                </div>
+                                            </div>
+                                            <div class="pro-cart-btn mb-25">
+                                                <a href="{% url 'cart_add' i.id %}" class="cart-btn">Add to cart</a>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="product__stock mb-30">
+                                    <ul>
+                                        <li>
+                                            <a href="#"><span class="sku mr-10">Model Name:</span><span>{{ i.model_name }}</span></a>
+                                        </li>
+                                        <li>
+                                            <a href="#"><span class="cat mr-10">Categories:</span><span>{{ i.Categories }}</span></a>
+                                        </li>
+                                        <li>
+                                            <a href="#"><span class="tag mr-10">Tags:</span><span>{{ i.Tags }}</span></a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div> <!-- row -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+<!-- shop modal end -->
+
+
+
+{% endblock %}

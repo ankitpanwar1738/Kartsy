@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block body %}
+
+<style>
+    .thank-you-container {
+        text-align: center;
+        padding: 100px 20px;
+    }
+    .checkmark {
+        font-size: 100px;
+        color: #28a745; /* Bootstrap green */
+    }
+    .thank-you-container h2 {
+        margin-top: 20px;
+        font-weight: 600;
+    }
+    .thank-you-container p {
+        font-size: 18px;
+        color: #555;
+    }
+    .thank-you-container .btn {
+        margin-top: 20px;
+    }
+    .thank-you-container h4 {
+        margin-top: 40px;
+        color: #007bff;
+    }
+</style>
+
+<div class="container thank-you-container">
+    <div class="checkmark">&#10004;</div>
+    <h2>Thank you for your order!</h2>
+    <p>You will receive a confirmation email shortly.</p>
+    <a href="{% url 'home' %}" class="btn btn-primary">Continue Shopping</a>
+</div>
+
+{% endblock %}
